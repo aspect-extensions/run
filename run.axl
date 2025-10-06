@@ -16,7 +16,7 @@ def spawn(ctx: task_context, entrypoint: str, args: list[str]) -> std.process.ch
     Args:
       ctx: AXL task context
       entrypoint: relative path to the executable, typically under bazel-bin
-
+      args: list of arguments to pass to the executable
     """
     runfiles = entrypoint + ".runfiles"
     return ctx.std.process.command(entrypoint)\
@@ -48,7 +48,6 @@ def _run_impl(ctx):
 
     if len(targets) > 1:
         out.write("Multiple targets are not supported yet. Coming soon.")
-
 
     build = ctx.bazel.build(
         events = True,
