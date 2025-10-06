@@ -26,7 +26,7 @@ def _impl(ctx):
     )
     run = runnable(ctx, targets)
     for event in build.events():
-        if event.type == "progress":
+        if event.kind == "progress":
             out.write(event.payload.stdout)
             out.write(event.payload.stderr)
         else:
