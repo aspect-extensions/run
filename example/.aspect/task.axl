@@ -1,3 +1,0 @@
-load("../../run.axl", _run = "run")
-
-run = _run
