@@ -1,0 +1,87 @@
+def _process_bes(state: struct, event: bazel.build.build_event.BuildEvent):
+    filesets = state.filesets
+    target_fileset = state.target_fileset
+    targets = state.targets
+    if event.type == "named_set_of_files":
+        filesets[event.id.id] = event.payload.files
+    elif event.type == "target_completed":
+        if event.id.label in targets:
+            for og in event.payload.output_groups:
+                if og.name == "default":
+                    target_fileset[event.id.label] = og.file_sets
+
+def _determine_entrypoint(state: struct, target: str) -> str | None:
+    filesets = state.filesets
+    target_fileset = state.target_fileset
+    if target not in target_fileset:
+        return None
+    targetfs = target_fileset[target][0].id
+    files = filesets[targetfs]
+    entrypoint = None
+    for file in files:
+        if len(file.path_prefix):
+            entrypoint = file.file.uri.removeprefix("file://")
+            break
+    return entrypoint
+
+def _spawn(ctx: task_context, entrypoint: str, args: list[str]) -> std.process.child:
+    runfiles = entrypoint + ".runfiles"
+    return ctx.std.process.command(entrypoint)\
+        .current_dir(runfiles) \
+        .env("RUNFILES_DIR", runfiles) \
+        .env("JAVA_RUNFILES", runfiles) \
+        .env("RUNFILES_MANIFEST_FILE", runfiles + "_manifest") \
+        .env("BUILD_WORKSPACE_DIRECTORY", "TODO") \
+        .env("BUILD_WORKING_DIRECTORY", ctx.std.env.current_dir()) \
+        .args(args) \
+        .spawn()
+
+
+def _as_spawn(ctx: task_context, target: str, entrypoint: str, args: list[str]) -> list[str]:
+    runfiles = entrypoint + ".runfiles"
+    spawn = [
+        "--spawn",
+        entrypoint,
+        "--title",
+        target,
+        "--current_dir",
+        runfiles,
+        "--env",
+        "RUNFILES_DIR=%s" % runfiles,
+        "--env",
+        "JAVA_RUNFILES=%s" % runfiles,
+        "--env",
+        "RUNFILES_MANIFEST_FILE=%s_manifest" % runfiles,
+        "--env",
+        "BUILD_WORKSPACE_DIRECTORY=TODO",
+        "--env",
+        "BUILD_WORKING_DIRECTORY=%s" % ctx.std.env.current_dir(),
+    ]
+    for arg in args:
+        spawn.add("--arg")
+        spawn.add(arg)
+    return spawn
+
+def _spawn_mux(ctx: task_context, args: list[str]) -> std.process.child:
+    muxer = "/Users/thesayyn/Documents/aspect-cli2/target/debug/pty-multiplex"
+    return ctx.std.process.command(muxer) \
+        .args(args) \
+        .spawn()
+
+def runnable(ctx, targets: list[str]) -> struct:
+    state = struct(
+        ctx = ctx,
+        targets = targets,
+        filesets = {},
+        target_fileset = {}
+    )
+
+    return struct(
+        event = lambda event: _process_bes(state, event),
+        determine_entrypoint = lambda event: _determine_entrypoint(state, event),
+        spawn = lambda entrypoint, args: _spawn(ctx, entrypoint, args),
+        as_spawn_mux = lambda title, entrypoint, args: _as_spawn(ctx, title, entrypoint, args),
+        spawn_mux = lambda args: _spawn_mux(ctx, args)
+    )
+
+spawn = _spawn
