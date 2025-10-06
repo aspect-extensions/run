@@ -2,9 +2,9 @@ def _process_bes(state: struct, event: bazel.build.build_event.BuildEvent):
     filesets = state.filesets
     target_fileset = state.target_fileset
     targets = state.targets
-    if event.type == "named_set_of_files":
+    if event.kind == "named_set_of_files":
         filesets[event.id.id] = event.payload.files
-    elif event.type == "target_completed":
+    elif event.kind == "target_completed":
         if event.id.label in targets:
             for og in event.payload.output_groups:
                 if og.name == "default":
