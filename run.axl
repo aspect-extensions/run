@@ -31,23 +31,24 @@ def spawn(ctx: task_context, entrypoint: str, args: list[str]) -> std.process.ch
 
 def _run_impl(ctx):
     out = ctx.std.io.stdout
+    err = ctx.std.io.stderr
     targets = ctx.args.target
 
     if len(targets) == 0:
-        out.write("INFO: No targets specified, finding the default target.\n")
+        err.write("INFO: No targets specified, finding the default target.\n")
         target_set = ctx.bazel.query().raw("attr(tags, '\\bdefault_run\\b', //...)").eval()
         if len(target_set) == 0:
-            out.write("\x1b[0;31mERROR\x1b[0m: No default targets found.\n")
+            err.write("\x1b[0;31mERROR\x1b[0m: No default targets found.\n")
             return 1
         elif len(target_set) > 1:
-            out.write("Multiple default targets found.")
+            err.write("Multiple default targets found.")
             return 1
         targets = [str(target_set[0])]
-        out.write("\x1b[0;32mINFO\x1b[0m: Found the default target: %s\n" % targets[0])
-        out.flush()
+        err.write("\x1b[0;32mINFO\x1b[0m: Found the default target: %s\n" % targets[0])
+        err.flush()
 
     if len(targets) > 1:
-        out.write("Multiple targets are not supported yet. Coming soon.")
+        err.write("Multiple targets are not supported yet. Coming soon.")
 
     build = ctx.bazel.build(
         events = True,
@@ -62,7 +63,7 @@ def _run_impl(ctx):
     for event in build.events():
         if event.kind == "progress":
             out.write(event.payload.stdout)
-            out.write(event.payload.stderr)
+            err.write(event.payload.stderr)
         else:
             # pass event for runnable to find the entrypoint
             run.event(event)
@@ -70,17 +71,17 @@ def _run_impl(ctx):
     entrypoint = run.determine_entrypoint(targets[0])
 
     if not entrypoint:
-        out.write("Could not determine the binary entry point.")
+        err.write("Could not determine the binary entry point.")
         return 1
 
-    out.write("\x1b[F\x1b[0;32mINFO\x1b[0m: Running: \x1b[1;97m%s\x1b[0m\n" % entrypoint[entrypoint.find("bazel-out"):])
-    out.write("\n")
-    out.flush()
+    err.write("\x1b[F\x1b[0;32mINFO\x1b[0m: Running: \x1b[1;97m%s\x1b[0m\n" % entrypoint[entrypoint.find("bazel-out"):])
+    err.write("\n")
+    err.flush()
 
     exit = run.spawn(entrypoint, ctx.args.varargs).wait()
 
     if not exit.success:
-        out.write("\x1b[0;31mERROR\x1b[0m: process exited with code %d\n" % exit.code)
+        err.write("\x1b[0;31mERROR\x1b[0m: process exited with code %d\n" % exit.code)
 
     return exit.code
 

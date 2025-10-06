@@ -11,4 +11,4 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
     { echo>&2 "ERROR: cannot find $f"; exit 1; }; f=; set -e
 # --- end runfiles.bash initialization v3 ---
 
-cat "$(rlocation _main/data.json)"
+jq --raw-output .message "$(rlocation _main/data.json)"

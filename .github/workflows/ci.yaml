@@ -24,4 +24,5 @@ jobs:
                 chmod: 0755
             - name: Test
               working-directory: example
-              run: aspect run //:bin
+              shell: sh
+              run: $GITHUB_WORKSPACE/example/README.md || exit 1
