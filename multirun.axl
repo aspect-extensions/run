@@ -1,0 +1,83 @@
+"EXPERIMENTAL: run multiple binaries"
+load("./runnable.axl", "runnable")
+
+def _impl(ctx):
+    out = ctx.std.io.stdout
+    targets = ctx.args.varargs
+
+    if len(targets) == 0:
+        out.write("INFO: No targets specified, finding the default target.\n")
+        target_set = ctx.bazel.query().raw("attr(tags, '\\bdefault_run_mux\\b', //...)").eval()
+        if len(target_set) == 0:
+            out.write("\x1b[0;31mERROR\x1b[0m: No default targets found.\n")
+            return 1
+        targets = [str(target) for target in target_set]
+        out.write("\x1b[0;32mINFO\x1b[0m: Found the default target: %s\n" % ",".join(targets))
+        out.flush()
+
+    build = ctx.bazel.build(
+        events = True,
+        bazel_flags = [
+            "--isatty=" + str(int(out.is_tty)),
+            # need the runfiles directory.
+            "--build_runfile_links",
+        ],
+        *targets,
+    )
+    run = runnable(ctx, targets)
+    for event in build.events():
+        if event.type == "progress":
+            out.write(event.payload.stdout)
+            out.write(event.payload.stderr)
+        else:
+            # pass event for runnable to find the entrypoint
+            run.event(event)
+
+    # Needs pty multiplexer
+    if len(targets) > 1:
+        out.write("\x1b[F\x1b[0;32mINFO\x1b[0m: Multiple targets requested. Running in multiplex mode.\n")
+        out.flush()
+        args = []
+
+        for target in targets:
+            entrypoint = run.determine_entrypoint(target)
+            if not entrypoint:
+                 out.write("Could not determine the binary entry point for %s." % target)
+                 return 1
+            args.extend(
+                run.as_spawn_mux(
+                    title = target,
+                    entrypoint = entrypoint,
+                    # TODO: choose which args belong to which target
+                    args = []
+                )
+            )
+
+        exit = run.spawn_mux(args).wait()
+    else:
+        entrypoint = run.determine_entrypoint(targets[0])
+
+        if not entrypoint:
+            out.write("Could not determine the binary entry point.")
+            return 1
+
+        out.write("\x1b[F\x1b[0;32mINFO\x1b[0m: Running: \x1b[1;97m%s\x1b[0m\n" % entrypoint[entrypoint.find("bazel-out"):])
+        out.write("\n")
+        out.flush()
+
+        exit = run.spawn(entrypoint, ctx.args.varargs).wait()
+
+
+    if not exit.success:
+        out.write("\x1b[0;31mERROR\x1b[0m: process exited with code %d\n" % exit.code)
+
+    return exit.code
+
+multi_run = struct(
+    implementation = _impl,
+    args = {
+        "target": args.positional(min = 0, max = 2),
+        "varargs": args.trailing_var_args()
+    },
+    groups = ["experimental"],
+)
