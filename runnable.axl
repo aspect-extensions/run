@@ -25,6 +25,18 @@ def _determine_entrypoint(state: struct, target: str) -> str | None:
     return entrypoint
 
 def _spawn(ctx: task_context, entrypoint: str, args: list[str]) -> std.process.child:
+    """Execute a program that was built by Bazel.
+
+    - Set the environment required for commonly understood language-specific Runfiles libraries
+    - Set BUILD_WORKING_DIRECTORY and BUILD_WORKSPACE_DIRECTORY like Bazel does
+
+    TODO: set the env and args that the *_binary target specifies
+
+    Args:
+      ctx: AXL task context
+      entrypoint: relative path to the executable, typically under bazel-bin
+      args: list of arguments to pass to the executable
+    """
     runfiles = entrypoint + ".runfiles"
     return ctx.std.process.command(entrypoint)\
         .current_dir(runfiles) \
