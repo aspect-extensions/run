@@ -76,7 +76,7 @@ def _impl(ctx):
 multi_run = task(
     implementation = _impl,
     args = {
-        "target": args.positional(min = 0, max = 2),
+        "target": args.positional(),
         "varargs": args.trailing_var_args()
     },
 )

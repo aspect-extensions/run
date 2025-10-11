@@ -13,13 +13,11 @@ def _process_bes(state: struct, event: bazel.build.build_event.BuildEvent):
 def _determine_entrypoint(state: struct, target: str) -> str | None:
     filesets = state.filesets
     target_fileset = state.target_fileset
-    print(target_fileset)
     if target not in target_fileset:
         return None
     targetfs = target_fileset[target][0].id
     files = filesets[targetfs]
     entrypoint = None
-    print(files)
     for file in files:
         if len(file.path_prefix):
             entrypoint = file.file.removeprefix("file://")
@@ -76,8 +74,19 @@ def _as_spawn(ctx: task_context, target: str, entrypoint: str, args: list[str]) 
         spawn.add(arg)
     return spawn
 
+def _uname(ctx) -> str:
+    raw = ctx.std.process.command("uname").arg("-mo").spawn().wait_with_output().stdout
+    (os, arch) = raw.split(" ", 1)
+    return "%s_%s".format(arch.replace("arm64", "aarch64"), os.replace("darwin", "apple_darwin").replace("GNU/Linux", "unknown_linux_musl"))
+
 def _spawn_mux(ctx: task_context, args: list[str]) -> std.process.child:
-    ctx.std.process.command("curl").args("https://github.com/aspect-extensions/run/releases/download/2025.41.0/pty-multiplex_aarch64_apple_darwin", "-o", "/tmp/pty-multiplex").spawn().wait()
+    if not ctx.std.fs.exists("/tmp/pty-multiplex"):
+        uname = _uname(ctx);
+        ctx.http().download(
+            url = "https://github.com/aspect-extensions/run/releases/download/2025.41.0/pty-multiplex_"  + uname,
+            output = "/tmp/pty-multiplex",
+            mode = 0o777
+        ).block()
     return ctx.std.process.command("/tmp/pty-multiplex") \
         .args(args) \
         .spawn()
