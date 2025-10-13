@@ -75,15 +75,17 @@ def _as_spawn(ctx: task_context, target: str, entrypoint: str, args: list[str]) 
     return spawn
 
 def _uname(ctx) -> str:
-    raw = ctx.std.process.command("uname").stdout("piped").arg("-mo").spawn().wait_with_output().stdout
+    raw = ctx.std.process.command("uname").stdout("piped").arg("-ms").spawn().wait_with_output().stdout
     (os, arch) = raw.split(" ", 1)
-    return "%s_%s".format(arch.replace("arm64", "aarch64"), os.replace("darwin", "apple_darwin").replace("GNU/Linux", "unknown_linux_musl"))
+    return "{}_{}".format(
+        arch.strip().replace("arm64", "aarch64"),
+        os.lower().replace("darwin", "apple_darwin").replace("linux", "unknown_linux_musl")
+    )
 
 def _spawn_mux(ctx: task_context, args: list[str]) -> std.process.child:
     if not ctx.std.fs.exists("/tmp/pty-multiplex"):
-        uname = _uname(ctx);
         ctx.http().download(
-            url = "https://github.com/aspect-extensions/run/releases/download/2025.41.0/pty-multiplex_"  + uname,
+            url = "https://github.com/aspect-extensions/run/releases/download/2025.41.0/pty-multiplex_" + _uname(ctx),
             output = "/tmp/pty-multiplex",
             mode = 0o777
         ).block()
