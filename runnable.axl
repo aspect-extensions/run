@@ -75,7 +75,7 @@ def _as_spawn(ctx: task_context, target: str, entrypoint: str, args: list[str]) 
     return spawn
 
 def _uname(ctx) -> str:
-    raw = ctx.std.process.command("uname").arg("-mo").spawn().wait_with_output().stdout
+    raw = ctx.std.process.command("uname").stdout("piped").arg("-mo").spawn().wait_with_output().stdout
     (os, arch) = raw.split(" ", 1)
     return "%s_%s".format(arch.replace("arm64", "aarch64"), os.replace("darwin", "apple_darwin").replace("GNU/Linux", "unknown_linux_musl"))
 
