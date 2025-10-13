@@ -13,6 +13,4 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
 
 jq --raw-output .message "$(rlocation _main/data.json)"
 
-env
-
 sleep 10
