@@ -22,6 +22,6 @@ output="$(aspect run //:bin)"
 Run multiple programs:
 
 ~~~sh
-aspect multi_run -- :bin :program2
+aspect multi_run -- //:bin //:program2
 ~~~
 
