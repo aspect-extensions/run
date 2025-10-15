@@ -38,23 +38,26 @@ jobs:
           # Avoid downloading Bazel every time.
           bazelisk-cache: true
           # Store build cache per workflow.
-          disk-cache: true
+          disk-cache: ${{ github.workflow }}
           # Share repository cache between workflows.
           repository-cache: true
+          external-cache: false
 
       - name: Build release artifacts
         working-directory: pty-multiplex
         run: |
-          mkdir -p ../upload_root/assets
-          bazel run --config=release --config=ci :release -- "${PWD}/../upload_root/assets"
+          mkdir -p upload_root/assets
+          bazel build --config=release --config=ci :release
+          ls bazel-out/k8-opt/bin/
+          bazel run --config=release --config=ci :release -- "${PWD}/upload_root/assets"
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
-          subject-path: "upload_root/assets/*"
+          subject-path: "pty-multiplex/upload_root/assets/*"
 
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
-          path: upload_root/
+          path: pty-multiplex/upload_root/
           retention-days: 1
