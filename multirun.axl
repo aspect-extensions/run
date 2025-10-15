@@ -11,7 +11,7 @@ def _impl(ctx):
         if len(target_set) == 0:
             out.write("\x1b[0;31mERROR\x1b[0m: No default targets found.\n")
             return 1
-        targets = [str(target) for target in target_set]
+        targets = [str(target.name) for target in target_set]
         out.write("\x1b[0;32mINFO\x1b[0m: Found the default target: %s\n" % ",".join(targets))
         out.flush()
 
@@ -73,11 +73,10 @@ def _impl(ctx):
 
     return exit.code
 
-multi_run = struct(
+multi_run = task(
     implementation = _impl,
     args = {
-        "target": args.positional(min = 0, max = 2),
+        "target": args.positional(),
         "varargs": args.trailing_var_args()
     },
-    groups = ["experimental"],
 )
