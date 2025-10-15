@@ -1,0 +1,21 @@
+[package]
+name = "pty-multiplex"
+version = "0.0.0-DEV"
+categories = ["development-tools"]
+homepage = "https://github.com/aspect-extensions/run"
+repository = "https://github.com/aspect-extensions/run"
+license = "Apache 2"
+edition = "2024"
+readme = "README.md"
+rust-version = "1.88.0"
+
+[dependencies]
+bytes = "1.10.1"
+crossterm = "0.29.0"
+portable-pty = "0.9.0"
+ratatui = "0.29.0"
+tokio = { version = "1.47.1", features = ["full", "macros", "rt-multi-thread"] }
+tracing = "0.1.41"
+tracing-subscriber = "0.3.20"
+tui-term = { git = "https://github.com/a-kenji/tui-term", branch = "development" }
+vt100 = "0.15.2"
