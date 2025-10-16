@@ -1,0 +1,47 @@
+name: Publish Release
+
+on:
+  push:
+    tags:
+      - "v[0-9].[0-9]+.[0-9]+"
+
+permissions:
+  id-token: write
+  attestations: write
+  contents: write
+
+jobs:
+  create-release:
+    name: Build MacOS and Linux release artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Prepare workspace snippet
+        run: .github/workflows/install_snippet.sh > release_notes.txt
+
+      - name: Create GitHub draft release and upload artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          # Use GH feature to populate the changelog automatically
+          generate_release_notes: true
+          body_path: release_notes.txt
+  upload-assets:
+    needs: create-release
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: taiki-e/upload-rust-binary-action@3962470d6e7f1993108411bc3f75a135ec67fc8c # v1.27.0
+        with:
+          bin: pty-multiplex
+          target: ${{ matrix.target }}
+          token: ${{ secrets.GITHUB_TOKEN }}
