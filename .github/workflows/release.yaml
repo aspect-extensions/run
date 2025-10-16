@@ -56,12 +56,14 @@ jobs:
 
       # Upload to the existing draft release (created earlier)
       - name: Upload binary to GitHub Release
+        working-directory: pty-multiplex
         run: |
           BIN_NAME=mybinary${{ matrix.ext }}
           BIN_PATH=target/${{ matrix.target }}/release/$BIN_NAME
 
           echo "Uploading $BIN_PATH..."
           gh release upload "$TAG" "$BIN_PATH" --clobber
+
   publish-release:
     runs-on: ubuntu-latest
     needs: upload-assets
