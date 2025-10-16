@@ -29,6 +29,8 @@ jobs:
     needs: draft-release
     strategy:
       matrix:
+        binary_name:
+          - pty-multiplex
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
@@ -49,21 +51,21 @@ jobs:
       # Optional: show Rust version for debugging
       - run: rustc --version && cargo --version
 
-      # Build the release binary
       - name: Build release binary
-        working-directory: pty-multiplex
+        working-directory: ${{ matrix.binary_name }}
         run: cargo build --release --target ${{ matrix.target }}
 
       # Upload to the existing draft release (created earlier)
       - name: Upload binary to GitHub Release
-        working-directory: pty-multiplex
+        working-directory: ${{ matrix.binary_name }}
         shell: bash # Avoid PowerShell
         run: |
-          BIN_NAME=pty-multiplex${{ matrix.ext }}
-          BIN_PATH=target/${{ matrix.target }}/release/$BIN_NAME
-
-          echo "Uploading $BIN_PATH..."
-          gh release upload "$TAG" "$BIN_PATH" --clobber
+          BIN_BASENAME=${{ matrix.binary_name }}
+          BIN_NAME="${BIN_BASENAME}-${{ matrix.target }}${{ matrix.ext }}"
+          BIN_PATH="target/${{ matrix.target }}/release/${BIN_BASENAME}${{ matrix.ext }}"
+      
+          echo "Uploading $BIN_PATH as $BIN_NAME..."
+          gh release upload "$TAG" "$BIN_PATH#${BIN_NAME}"
 
   publish-release:
     runs-on: ubuntu-latest
