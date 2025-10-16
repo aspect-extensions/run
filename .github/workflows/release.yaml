@@ -28,16 +28,17 @@ jobs:
     needs: draft-release
     strategy:
       matrix:
-        binary_name:
-          - pty-multiplex
         include:
-          - target: x86_64-unknown-linux-gnu
+          - binary_name: pty-multiplex
+            target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             ext: ''
-          - target: aarch64-apple-darwin
+          - binary_name: pty-multiplex
+            target: aarch64-apple-darwin
             os: macos-latest
             ext: ''
-          - target: x86_64-pc-windows-msvc
+          - binary_name: pty-multiplex
+            target: x86_64-pc-windows-msvc
             os: windows-latest
             ext: '.exe'
     runs-on: ${{ matrix.os }}
