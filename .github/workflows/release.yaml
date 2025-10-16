@@ -16,8 +16,7 @@ env:
   GH_TOKEN: ${{ github.token }}
 
 jobs:
-  create-release:
-    name: Draft a release
+  draft-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -27,7 +26,7 @@ jobs:
 
   upload-assets:
     name: Build Rust binaries and upload to release
-    needs: create-release
+    needs: draft-release
     strategy:
       matrix:
         include:
@@ -52,6 +51,7 @@ jobs:
 
       # Build the release binary
       - name: Build release binary
+        working-directory: pty-multiplex
         run: cargo build --release --target ${{ matrix.target }}
 
       # Upload to the existing draft release (created earlier)
