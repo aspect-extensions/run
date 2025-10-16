@@ -6,12 +6,14 @@ on:
       - "v[0-9].[0-9]+.[0-9]+"
 
 permissions:
+  # TODO: publish attestations
   id-token: write
   attestations: write
   contents: write
 
 env:
   TAG: ${{ github.ref_name }}
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   create-release:
