@@ -6,3 +6,7 @@ Why?
   - No one wants to write `--run_under="cd $PWD &&"`
 - Add support for watch mode
 - Ability to run multiple binaries
+
+## multi_run task
+
+[![asciicast](https://asciinema.org/a/NjHTT8Ta67O2rfTc8f4QXW2yB.svg)](https://asciinema.org/a/NjHTT8Ta67O2rfTc8f4QXW2yB)

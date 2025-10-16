@@ -1,8 +1,0 @@
-import %workspace%/bazel/defaults.bazelrc
-
-
-# Don't link against libunwind on macos as it causes linking failures (https://github.com/bazel-contrib/toolchains_llvm/pull/346)
-common:macos --@toolchains_llvm//toolchain/config:libunwind=False
-
-common:release --compilation_mode=opt
-common:release --@rules_rust//rust/settings:lto=fat

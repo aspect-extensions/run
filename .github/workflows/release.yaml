@@ -1,0 +1,78 @@
+name: Publish Release
+
+on:
+  push:
+    tags:
+      - "v[0-9].[0-9]+.[0-9]+"
+
+permissions:
+  id-token: write
+  attestations: write
+  contents: write
+
+env:
+  TAG: ${{ github.ref_name }}
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  draft-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Prepare workspace snippet
+        run: .github/workflows/install_snippet.sh > release_notes.txt
+      - run: gh release create "$TAG" --draft --generate-notes --notes-file release_notes.txt
+
+  upload-assets:
+    name: Build Rust binaries and upload to release
+    needs: draft-release
+    strategy:
+      matrix:
+        include:
+          - binary_name: pty-multiplex
+            target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            ext: ''
+          - binary_name: pty-multiplex
+            target: aarch64-apple-darwin
+            os: macos-latest
+            ext: ''
+          - binary_name: pty-multiplex
+            target: x86_64-pc-windows-msvc
+            os: windows-latest
+            ext: '.exe'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      # Use lightweight official Rust setup respecting rust-toolchain.toml
+      - uses: dtolnay/rust-toolchain@5d458579430fc14a04a08a1e7d3694f545e91ce6
+
+      # Optional: show Rust version for debugging
+      - run: rustc --version && cargo --version
+
+      - name: Build release binary
+        working-directory: ${{ matrix.binary_name }}
+        run: cargo build --release --target ${{ matrix.target }}
+
+      # Upload to the existing draft release (created earlier)
+      - name: Upload binary to GitHub Release
+        working-directory: ${{ matrix.binary_name }}
+        shell: bash # Avoid PowerShell
+        run: |
+          BIN_BASENAME=${{ matrix.binary_name }}
+          BIN_NAME="${BIN_BASENAME}-${{ matrix.target }}${{ matrix.ext }}"
+          cp "target/${{ matrix.target }}/release/${BIN_BASENAME}${{ matrix.ext }}" "$BIN_NAME"
+          echo "Uploading $BIN_NAME..."
+          gh release upload "$TAG" "$BIN_NAME" --repo "$GITHUB_REPOSITORY"
+
+      - name: Generate build provenance attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ${{ matrix.binary_name }}/target/${{ matrix.target }}/release/${{ matrix.binary_name }}${{ matrix.ext }}
+
+  publish-release:
+    runs-on: ubuntu-latest
+    needs: upload-assets
+    steps:
+      - run: gh release edit "$TAG" --draft=false --repo "$GITHUB_REPOSITORY"

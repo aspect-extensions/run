@@ -13,4 +13,9 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
 
 jq --raw-output .message "$(rlocation _main/data.json)"
 
-sleep 10
+# Countdown timer from 10 to 1
+for i in {10..1}; do
+    echo "$i"
+    sleep 1
+done
+echo "🎉 Done!"
