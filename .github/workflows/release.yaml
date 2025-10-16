@@ -57,6 +57,7 @@ jobs:
       # Upload to the existing draft release (created earlier)
       - name: Upload binary to GitHub Release
         working-directory: pty-multiplex
+        shell: bash # Avoid PowerShell
         run: |
           BIN_NAME=pty-multiplex${{ matrix.ext }}
           BIN_PATH=target/${{ matrix.target }}/release/$BIN_NAME
