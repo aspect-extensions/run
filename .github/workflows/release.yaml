@@ -62,10 +62,9 @@ jobs:
         run: |
           BIN_BASENAME=${{ matrix.binary_name }}
           BIN_NAME="${BIN_BASENAME}-${{ matrix.target }}${{ matrix.ext }}"
-          BIN_PATH="target/${{ matrix.target }}/release/${BIN_BASENAME}${{ matrix.ext }}"
-      
-          echo "Uploading $BIN_PATH as $BIN_NAME..."
-          gh release upload "$TAG" "$BIN_PATH#${BIN_NAME}"
+          cp "target/${{ matrix.target }}/release/${BIN_BASENAME}${{ matrix.ext }}" "$BIN_NAME"
+          echo "Uploading $BIN_NAME..."
+          gh release upload "$TAG" "$BIN_NAME" --repo "$GITHUB_REPOSITORY"
 
       - name: Generate build provenance attestation
         uses: actions/attest-build-provenance@v1
