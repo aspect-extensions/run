@@ -1,12 +1,9 @@
 [toolchain]
-# Use the latest stable compiler for consistency across OSes
-channel = "stable"
+# Ensure builds are reproducible by locking the toolchain version
+channel = "1.88.0"
 
 # Always install these by default in CI (cargo, rustfmt, clippy)
 components = ["cargo"]
-
-# Ensure builds are reproducible by locking the toolchain version
-channel = "1.88.0"
 
 # Automatically add required targets for your matrix
 targets = [
