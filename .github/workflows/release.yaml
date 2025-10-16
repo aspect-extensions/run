@@ -58,7 +58,7 @@ jobs:
       - name: Upload binary to GitHub Release
         working-directory: pty-multiplex
         run: |
-          BIN_NAME=mybinary${{ matrix.ext }}
+          BIN_NAME=pty-multiplex${{ matrix.ext }}
           BIN_PATH=target/${{ matrix.target }}/release/$BIN_NAME
 
           echo "Uploading $BIN_PATH..."
