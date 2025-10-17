@@ -1,4 +1,4 @@
-A replacement for the 'bazel run' command.
+A replacement for the 'bazel run' command. and stuff
 
 Why?
 
