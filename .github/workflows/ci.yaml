@@ -11,7 +11,7 @@ on:
       - synchronize
 jobs:
   call-org-checks:
-    uses: aspect-extensions/.github/.github/workflows/org-check.yml@main
+    uses: aspect-extensions/.github/.github/workflows/org-check.yaml@main
   test:
     runs-on: ubuntu-latest
     steps:
