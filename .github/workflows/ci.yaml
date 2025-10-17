@@ -5,7 +5,15 @@ on:
   pull_request:
     branches:
       - main
+    types:
+      - opened
+      - edited
+      - synchronize
+
 jobs:
+  call-org-checks:
+    uses: aspect-extensions/.github/.github/workflows/org-check.yaml@main
+    secrets: inherit
   test:
     runs-on: ubuntu-latest
     steps:
