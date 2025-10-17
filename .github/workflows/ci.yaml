@@ -9,6 +9,7 @@ on:
       - opened
       - edited
       - synchronize
+
 jobs:
   call-org-checks:
     uses: aspect-extensions/.github/.github/workflows/org-check.yaml@main
