@@ -15,6 +15,8 @@ jobs:
   call-org-checks:
     uses: aspect-extensions/.github/.github/workflows/org-check.yaml@main
     secrets: inherit
+    permissions:
+      pull-requests: write
   test:
     runs-on: ubuntu-latest
     steps:
