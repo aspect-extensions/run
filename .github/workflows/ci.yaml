@@ -1,4 +1,3 @@
-# Checks that its good
 on:
   push:
     branches:
@@ -12,7 +11,7 @@ on:
       - synchronize
 
 jobs:
-  call-org-checks:
+  org-checks:
     uses: aspect-extensions/.github/.github/workflows/org-check.yaml@main
     secrets: inherit
     permissions:
