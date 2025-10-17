@@ -11,9 +11,12 @@ on:
       - synchronize
 
 jobs:
-  call-org-checks:
+  org-checks:
     uses: aspect-extensions/.github/.github/workflows/org-check.yaml@main
     secrets: inherit
+    permissions:
+      contents: read
+      pull-requests: write
   test:
     runs-on: ubuntu-latest
     steps:
