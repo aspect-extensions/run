@@ -4,6 +4,7 @@ Why?
 
 - 'bazel run' has inconsistent behavior about the working directory, which is often set to `$(bazel info execution root)`. See https://github.com/bazelbuild/bazel/issues/3325
   - No one wants to write `--run_under="cd $PWD &&"`
+  - Note, https://github.com/bazelbuild/bazel/commit/7df1587ab184c5b4e0f1d7094ebb56c6167d441c fixes this in Bazel 9
 - Add support for watch mode
 - Ability to run multiple binaries
 
