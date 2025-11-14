@@ -68,8 +68,8 @@ def _impl(ctx):
         exit = run.spawn(entrypoint, ctx.args.varargs).wait()
 
 
-    if not exit.success:
-        out.write("\x1b[0;31mERROR\x1b[0m: process exited with code %d\n" % exit.code)
+    # if not exit.success:
+    #     out.write("\x1b[0;31mERROR\x1b[0m: process exited with code %d\n" % exit.code)
 
     return exit.code
 

@@ -1,2 +1,3 @@
 "Public API re-export"
 use_task("multirun.axl", "multirun")
+use_task("run.axl", "run")

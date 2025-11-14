@@ -13,8 +13,8 @@ It should locate the data.json file from the runfiles.
 output="$(aspect run //:bin)"
 
 # Verify that it produces the expected output
-echo "${output}" | grep -q "Hello, world!" || {
-    echo >&2 "Wanted output containing 'Hello, world!' but got '${output}'"
+echo "${output}" | grep -q "Liftoff!" || {
+    echo >&2 "Wanted output containing 'Liftoff!' but got '${output}'"
     exit 1
 }
 ~~~
@@ -22,6 +22,6 @@ echo "${output}" | grep -q "Hello, world!" || {
 Run multiple programs:
 
 ~~~sh
-aspect multi_run -- //:bin //:program2
+aspect multirun -- //:bin //:program2
 ~~~
 
