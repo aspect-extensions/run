@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Launch countdown timer
 
 # --- begin runfiles.bash initialization v3 ---
 # Copy-pasted from the Bazel Bash runfiles library v3.
@@ -11,11 +12,9 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
     { echo>&2 "ERROR: cannot find $f"; exit 1; }; f=; set -e
 # --- end runfiles.bash initialization v3 ---
 
-jq --raw-output .message "$(rlocation _main/data.json)"
-
-# Countdown timer from 10 to 1
-for i in {10..1}; do
+for i in {5..1}; do
     echo "$i"
     sleep 1
 done
-echo "🎉 Done!"
+jq --raw-output .message "$(rlocation _main/data.json)"
+sleep 1
