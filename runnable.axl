@@ -24,7 +24,7 @@ def _determine_entrypoint(state: struct, target: str) -> str | None:
             break
     return entrypoint
 
-def _spawn(ctx: task_context, entrypoint: str, args: list[str]) -> std.process.child:
+def _spawn(ctx: TaskContext, entrypoint: str, args: list[str]) -> std.process.Child:
     """Execute a program that was built by Bazel.
 
     - Set the environment required for commonly understood language-specific Runfiles libraries
@@ -49,7 +49,7 @@ def _spawn(ctx: task_context, entrypoint: str, args: list[str]) -> std.process.c
         .spawn()
 
 
-def _as_spawn(ctx: task_context, target: str, entrypoint: str, args: list[str]) -> list[str]:
+def _as_spawn(ctx: TaskContext, target: str, entrypoint: str, args: list[str]) -> list[str]:
     runfiles = entrypoint + ".runfiles"
     spawn = [
         "--spawn",
@@ -82,7 +82,7 @@ def _uname(ctx) -> str:
         os.lower().replace("darwin", "apple-darwin").replace("linux", "unknown-linux-gnu")
     )
 
-def _spawn_mux(ctx: task_context, args: list[str]) -> std.process.child:
+def _spawn_mux(ctx: TaskContext, args: list[str]) -> std.process.Child:
     if not ctx.std.fs.exists("/tmp/pty-multiplex"):
         ctx.http().download(
             url = "https://github.com/aspect-extensions/run/releases/download/v0.1.1/pty-multiplex-" + _uname(ctx),

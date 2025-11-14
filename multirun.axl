@@ -16,8 +16,8 @@ def _impl(ctx):
         out.flush()
 
     build = ctx.bazel.build(
-        events = True,
-        bazel_flags = [
+        build_events = True,
+        flags = [
             "--isatty=" + str(int(out.is_tty)),
             # need the runfiles directory.
             "--build_runfile_links",
@@ -25,7 +25,7 @@ def _impl(ctx):
         *targets,
     )
     run = runnable(ctx, targets)
-    for event in build.events():
+    for event in build.build_events():
         if event.kind == "progress":
             out.write(event.payload.stdout)
             out.write(event.payload.stderr)
@@ -73,7 +73,7 @@ def _impl(ctx):
 
     return exit.code
 
-multi_run = task(
+multirun = task(
     implementation = _impl,
     args = {
         "target": args.positional(),
